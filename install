@@ -1,0 +1,14 @@
+#!/bin/sh
+
+
+case $(cat /etc/centos-release )
+in
+  (CentOS Linux release 7.3*) 
+      url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
+  (CentOS Linux release 7.*)
+      url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
+  (CentOS Linux release 6.*)
+      url="http://download.zfsonlinux.org/epel/zfs-release.el6.noarch.rpm" ;;
+esac
+
+yum install -y "$url"
