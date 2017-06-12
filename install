@@ -27,13 +27,16 @@ else
   /usr/sbin/dkms autoinstall
 fi
 
+
+/sbin/modprobe zfs ||  exit 11
+
 target=$(lsblk | grep ^nvme.*disk | cut -f1 -d' ' | head -1)
 
 init_zfs() {
   case $(zpool status 2>&1)
   in
     ("The ZFS modules are not loaded."*)  /sbin/modprobe zfs ; init_zfs ;;
-    ("no pools available") /sbin/zpool import -a -f | grep "no pools available to import" &&  /sbin/zpool create main $target ;;
+    ("no pools available") /sbin/zpool import -a -f 2>&1 | grep "no pools available to import" &&  /sbin/zpool create main $target ;;
   esac
 }
 
