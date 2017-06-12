@@ -1,14 +1,40 @@
 #!/bin/sh
 
 
-case $(cat /etc/centos-release )
-in
-  ("CentOS Linux release 7.3"*) 
-      url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
-  ("CentOS Linux release 7."*)
-      url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
-  ("CentOS Linux release 6."*)
-      url="http://download.zfsonlinux.org/epel/zfs-release.el6.noarch.rpm" ;;
-esac
 
-yum install -y "$url"
+if
+  rpm -qa zfs | grep -q . && rpm -qa kernel-devel | grep -q $(uname -r)
+then
+  :
+else
+  case $(cat /etc/centos-release )
+  in
+    ("CentOS Linux release 7.3"*) 
+        url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
+    ("CentOS Linux release 7."*)
+        url="http://download.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm" ;;
+    ("CentOS Linux release 6."*)
+        url="http://download.zfsonlinux.org/epel/zfs-release.el6.noarch.rpm" ;;
+  esac
+
+  yum install -y "$url"
+
+  yum install -y zfs kernel-devel kernel-devel-$(uname -r)
+
+  sleep 2 
+
+  hash -r
+  /usr/sbin/dkms autoinstall
+fi
+
+target=$(lsblk | grep ^nvme.*disk | cut -f1 -d' ' | head -1)
+
+init_zfs() {
+  case $(zpool status 2>&1)
+  in
+    ("The ZFS modules are not loaded."*)  /sbin/modprobe zfs ; init_zfs ;;
+    ("no pools available") /sbin/zpool import -a -f ||  /sbin/zpool create main $target ;;
+  esac
+}
+
+init_zfs
