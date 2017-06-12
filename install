@@ -3,7 +3,7 @@
 
 (
 
-  sleep 120
+  sleep 240
 
   if
     rpm -qa zfs | grep -q . && rpm -qa kernel-devel | grep -q $(uname -r)
