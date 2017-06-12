@@ -33,7 +33,7 @@ init_zfs() {
   case $(zpool status 2>&1)
   in
     ("The ZFS modules are not loaded."*)  /sbin/modprobe zfs ; init_zfs ;;
-    ("no pools available") /sbin/zpool import -a -f ||  /sbin/zpool create main $target ;;
+    ("no pools available") /sbin/zpool import -a -f | grep "no pools available to import" &&  /sbin/zpool create main $target ;;
   esac
 }
 
